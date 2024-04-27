@@ -1,6 +1,7 @@
 package com.company.enroller.controllers;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,8 +19,14 @@ public class ParticipantRestController {
 	ParticipantService participantService;
 
 	@RequestMapping(value = "", method = RequestMethod.GET)
-	public ResponseEntity<?> getParticipants() {
-		Collection<Participant> participants = participantService.getAll();
+	public ResponseEntity<?> getParticipants(
+			@RequestParam(value = "sortBy", defaultValue = "") String sortBy,
+			@RequestParam(value = "sortOrder", defaultValue = "ASC") String sortOrder,
+			@RequestParam(value = "key", defaultValue = "") String key
+	) {
+
+		Collection<Participant> participants = participantService.getAll(sortBy, sortOrder, key);
+
 		return new ResponseEntity<Collection<Participant>>(participants, HttpStatus.OK);
 	}
 
