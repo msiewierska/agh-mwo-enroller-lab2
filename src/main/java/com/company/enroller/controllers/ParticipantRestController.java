@@ -3,13 +3,16 @@ package com.company.enroller.controllers;
 import java.util.Collection;
 import java.util.Comparator;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.company.enroller.model.Participant;
 import com.company.enroller.persistence.ParticipantService;
+import com.company.enroller.App;
 
 @RestController
 @RequestMapping("/participants")
@@ -40,12 +43,18 @@ public class ParticipantRestController {
 	}
 
 	@RequestMapping(value = "", method = RequestMethod.POST)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	public ResponseEntity<?> addParticipant(@RequestBody Participant participant) {
 		if (participantService.findByLogin(participant.getLogin()) != null) {
 			return new ResponseEntity<String>(
 					"Unable to create. A participant with login " + participant.getLogin() + " already exist.",
 					HttpStatus.CONFLICT);
 		}
+
+
+		PasswordEncoder passwordEncoder = App.passwordEncoder();
+		String hashedPassword = passwordEncoder.encode(participant.getPassword());
+		participant.setPassword(hashedPassword);
 		participantService.add(participant);
 		return new ResponseEntity<Participant>(participant, HttpStatus.CREATED);
 	}
@@ -61,6 +70,7 @@ public class ParticipantRestController {
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	public ResponseEntity<?> update(@PathVariable("id") String login, @RequestBody Participant updatedParticipant) {
 		Participant participant = participantService.findByLogin(login);
 		if (participant == null) {

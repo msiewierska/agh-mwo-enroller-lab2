@@ -25,15 +25,19 @@ public class ParticipantService {
     public Collection<Participant> getAll(String sortBy, String sortOrder, String key) {
         String hql = "FROM Participant";
 
-        if (key.equals("login")) {
+        if (!key.isEmpty()) {
             hql = hql + " WHERE login LIKE :loginValue";
-            String order = sortOrder.isEmpty() ? "ASC" : sortOrder;
-            hql = hql + " ORDER BY login " + order;
         }
+
+        if (!sortBy.isEmpty()) {
+            if (sortBy.equals("login")) {
+                String order = sortOrder.isEmpty() ? "ASC" : sortOrder;
+                hql = hql + " ORDER BY login " + order;
+            }}
 
         Query query = connector.getSession().createQuery(hql);
 
-        if (key.equals("login")) {
+        if (!key.isEmpty()) {
             query.setParameter("loginValue", "%" + key + "%");
         }
         return query.list();
